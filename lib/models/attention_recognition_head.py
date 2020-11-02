@@ -261,14 +261,14 @@ class DecoderUnit(nn.Module):
     return state
 
   def forward(self, x, sPrev, yPrev):
-    # x: feature sequence from the image decoder.
+    # x: feature sequence from the image decoder.  图像解码器的特征序列
     batch_size, T, _ = x.size()
     alpha = self.attention_unit(x, sPrev)
-    context = torch.bmm(alpha.unsqueeze(1), x).squeeze(1)
-    yProj = self.tgt_embedding(yPrev.long())
+    context = torch.bmm(alpha.unsqueeze(1), x).squeeze(1)  # g_t torch.bmm: 3D tensor相乘，.squeeze()压缩维度
+    yProj = self.tgt_embedding(yPrev.long())  # f(y(n-1)) 将y(n-1)转为词向量
     # self.gru.flatten_parameters()
-    output, state = self.gru(torch.cat([yProj, context], 1).unsqueeze(1), sPrev)
+    output, state = self.gru(torch.cat([yProj, context], 1).unsqueeze(1), sPrev)   # sPrev:s(n-1)
     output = output.squeeze(1)
 
-    output = self.fc(output)
+    output = self.fc(output)  # 全连接
     return output, state
